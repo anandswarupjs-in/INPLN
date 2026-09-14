@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: intelliplan-api
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/
+    envVars:
+      - key: DATABASE_URL
+        sync: false   # Set manually in Render dashboard — your Railway MySQL URL
+      - key: CORS_ORIGINS
+        value: "https://intelliplanwithdurai.online,https://www.intelliplanwithdurai.online"
+      - key: PYTHON_VERSION
+        value: "3.11.0"

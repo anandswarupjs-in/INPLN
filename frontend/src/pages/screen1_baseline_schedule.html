@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IntelliPlan — Project Setup & Baseline Schedule</title>
+<style>
+  :root{
+    --navy:#111111; --navy-dark:#111111; --navy-light:#222222;
+    --bg:#f5f5f5; --card:#FFFFFF; --border:#e5e5e5;
+    --text:#111111; --muted:#888888; --muted-2:#bbbbbb;
+    --orange:#10b981; --orange-bg:#d1fae5;
+    --success:#065f46; --success-bg:#d1fae5;
+    --blue:#1e40af; --blue-bg:#e8f4fd;
+    --warn:#333333; --warn-bg:#f5f5f5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .app{display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{width:236px;background:var(--navy-dark);color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 20px 22px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px;}
+  .brand-mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--orange),#F0A24A);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#1c1c1c;}
+  .brand-name{font-size:15px;font-weight:700;letter-spacing:.2px;}
+  .brand-sub{font-size:10.5px;color:#9FB2C8;margin-top:1px;}
+  .nav{display:flex;flex-direction:column;gap:2px;padding:0 10px;}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;color:#C4D2E2;text-decoration:none;font-size:13.5px;font-weight:500;}
+  .nav a.active{background:#d1fae5;color:#065f46;}
+  .nav a .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.55;}
+  .nav a.active .dot{background:#10b981;opacity:1;}
+  .sidebar-foot{margin-top:auto;padding:14px 20px 4px;font-size:11px;color:#7C93AC;border-top:1px solid rgba(255,255,255,.08);}
+
+  /* MAIN */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .proj-name{font-size:15px;font-weight:700;}
+  .status-badge{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--success-bg);color:var(--success);}
+  .topbar-right{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+  .content{padding:26px 32px 60px;max-width:1280px;}
+  h1.page-title{font-size:21px;font-weight:700;margin:0 0 4px;}
+  .page-sub{font-size:13px;color:var(--muted);margin:0 0 22px;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:20px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .card-title{font-size:14.5px;font-weight:700;}
+  .card-tag{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--muted-2);}
+
+  /* project info grid */
+  .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 26px;}
+  .info-item .label{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .info-item .value{font-size:13.5px;font-weight:600;}
+
+  /* upload area */
+  .upload-box{border:1.5px dashed #C7CFDA;border-radius:10px;background:#FAFBFC;padding:26px;display:flex;align-items:center;gap:22px;}
+  .upload-icon{width:52px;height:52px;border-radius:10px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .upload-text-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+  .upload-text-sub{font-size:12px;color:var(--muted);}
+  .upload-formats{font-size:11.5px;color:var(--muted-2);margin-top:6px;}
+  .btn{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .btn-outline{background:#fff;color:var(--navy);border:1px solid var(--border);border-radius:7px;padding:9px 16px;font-size:13px;font-weight:600;}
+
+  .file-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:12px 16px;background:#F7F9FA;border:1px solid var(--border);border-radius:8px;}
+  .file-row-left{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;}
+  .file-icon{width:26px;height:26px;border-radius:6px;background:var(--success-bg);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .pill-success{font-size:11px;font-weight:700;color:var(--success);background:var(--success-bg);padding:3px 9px;border-radius:20px;}
+
+  /* WBS tree */
+  .tree{font-size:13px;line-height:2;}
+  .tree .row{display:flex;align-items:center;gap:8px;}
+  .lvl-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;background:var(--blue-bg);color:var(--blue);min-width:26px;text-align:center;}
+  .tree .l0{margin-left:0;font-weight:700;}
+  .tree .l1{margin-left:22px;}
+  .tree .l2{margin-left:44px;}
+  .tree .l3{margin-left:66px;}
+  .tree .l4{margin-left:88px;}
+  .tree .l5{margin-left:110px;font-weight:600;color:var(--navy);}
+  .branch{color:var(--muted-2);}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;text-transform:none;padding:8px 10px;border-bottom:1px solid var(--border);background:#FAFBFC;}
+  tbody td{padding:10px 10px;border-bottom:1px solid #F0F2F4;}
+  tbody tr:last-child td{border-bottom:none;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--navy);font-weight:600;}
+  .progress-cell{display:flex;align-items:center;gap:8px;}
+  .progress-track{width:60px;height:6px;background:#EDEFF2;border-radius:4px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--muted-2);border-radius:4px;}
+
+  /* pipeline explanation */
+  .pipeline-strip{display:flex;align-items:center;gap:0;margin-top:6px;}
+  .pipe-step{flex:1;background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center;font-size:12px;font-weight:600;color:var(--text);position:relative;}
+  .pipe-step .sub{font-size:10.5px;color:var(--muted);font-weight:500;margin-top:2px;}
+  .pipe-arrow{width:30px;text-align:center;color:var(--muted-2);font-size:16px;flex-shrink:0;}
+  .pipe-step.user{border-color:var(--orange);background:var(--orange-bg);}
+  .pipe-step.user .tag,.pipe-step.system .tag{display:block;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--orange);margin-bottom:4px;}
+  .pipe-step.system .tag{color:var(--blue);}
+  .pipe-step.system{border-color:var(--blue);background:var(--blue-bg);}
+
+  .callout{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--navy);background:var(--blue-bg);border:1px solid #D6E4FB;border-radius:8px;padding:9px 14px;margin:14px 0 16px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">IP</div>
+      <div>
+        <div class="brand-name">IntelliPlan</div>
+        <div class="brand-sub">Project Scheduling App</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="active" href="#"><span class="dot"></span> Dashboard</a>
+      <a href="#"><span class="dot"></span> Projects</a>
+      <a href="#"><span class="dot"></span> Schedule</a>
+      <a href="#"><span class="dot"></span> Field Reports</a>
+      <a href="#"><span class="dot"></span> Matching & Verification</a>
+      <a href="#"><span class="dot"></span> Progress</a>
+      <a href="#"><span class="dot"></span> Audit Trail</a>
+    </div>
+    <div class="sidebar-foot">Organization: ABC Infrastructure Group</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="proj-name">Greenfield Industrial Expansion</div>
+        <div class="status-badge">● Active</div>
+      </div>
+      <div class="topbar-right">
+        <span>Project Manager</span>
+        <div class="avatar">PM</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <h1 class="page-title">Project Setup & Baseline Schedule</h1>
+      <p class="page-sub">Create the project record, then upload the baseline schedule to build the L1–L6 activity hierarchy.</p>
+
+      <!-- Project info card -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Project Information</div>
+          <div class="card-tag">PROJECT RECORD</div>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><div class="label">Project Name</div><div class="value">Greenfield Industrial Expansion</div></div>
+          <div class="info-item"><div class="label">Department</div><div class="value">Infrastructure / Electrical</div></div>
+          <div class="info-item"><div class="label">Contractor</div><div class="value">ABC Infrastructure Pvt Ltd</div></div>
+          <div class="info-item"><div class="label">Location</div><div class="value">Unit 3 Industrial Complex</div></div>
+          <div class="info-item"><div class="label">Budget</div><div class="value">₹48.5 Cr</div></div>
+          <div class="info-item"><div class="label">Planned Start</div><div class="value">10 Sep 2026</div></div>
+          <div class="info-item"><div class="label">Planned Finish</div><div class="value">15 Dec 2026</div></div>
+          <div class="info-item"><div class="label">Baseline Status</div><div class="value" style="color:var(--success)">Imported</div></div>
+        </div>
+      </div>
+
+      <!-- Upload card -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Upload Baseline Schedule</div>
+          <div class="card-tag" style="color:var(--orange)">USER INPUT</div>
+        </div>
+        <div class="upload-box">
+          <div class="upload-icon">⭱</div>
+          <div style="flex:1">
+            <div class="upload-text-title">Drag & drop your Excel/CSV schedule here</div>
+            <div class="upload-text-sub">or click to browse your files</div>
+            <div class="upload-formats">Supported formats: Excel (.xlsx), CSV (.csv)</div>
+          </div>
+          <button class="btn">Upload Schedule</button>
+        </div>
+
+        <div class="file-row">
+          <div class="file-row-left">
+            <div class="file-icon">XL</div>
+            <span>baseline_schedule.xlsx</span>
+            <span style="color:var(--muted);font-weight:500;">· 214 rows</span>
+          </div>
+          <div class="pill-success">✓ Successfully imported</div>
+        </div>
+      </div>
+
+      <div class="callout">⇩ Baseline schedule becomes the structured source of truth for all downstream matching.</div>
+
+      <!-- pipeline -->
+      <div class="pipeline-strip" style="margin-bottom:22px;">
+        <div class="pipe-step user"><span class="tag">USER INPUT</span>Uploaded Excel<div class="sub">baseline_schedule.xlsx</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step system"><span class="tag">SYSTEM PROCESSING</span>Parsed Schedule<div class="sub">FastAPI parser</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step system"><span class="tag">SYSTEM OUTPUT</span>L1–L6 WBS<div class="sub">Hierarchy built</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step system"><span class="tag">DATABASE UPDATE</span>MySQL Activities<div class="sub">214 activities stored</div></div>
+      </div>
+
+      <!-- WBS tree -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">L1–L6 Schedule Hierarchy</div>
+          <div class="card-tag">AUTO-GENERATED</div>
+        </div>
+        <div class="tree">
+          <div class="row l0"><span class="lvl-badge">L1</span> Greenfield Industrial Expansion</div>
+          <div class="row l1"><span class="branch">└─</span><span class="lvl-badge">L2</span> Electrical Scope</div>
+          <div class="row l2"><span class="branch">└─</span><span class="lvl-badge">L3</span> Power Distribution</div>
+          <div class="row l3"><span class="branch">└─</span><span class="lvl-badge">L4</span> Unit 3</div>
+          <div class="row l4"><span class="branch">└─</span><span class="lvl-badge">L5</span> Cable Installation</div>
+          <div class="row l5"><span class="branch">└─</span><span class="lvl-badge">L6</span> Install cable tray in Unit 3</div>
+        </div>
+      </div>
+
+      <!-- activities table -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Imported Activities (L6)</div>
+          <div class="card-tag">214 TOTAL</div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Activity ID</th><th>Level</th><th>Activity Description</th><th>Discipline</th><th>Location</th><th>Planned Start</th><th>Planned Finish</th><th>Progress</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">ELEC-1024</td><td>L6</td><td>Install cable tray in Unit 3</td><td>Electrical</td><td>Unit 3</td><td>10 Sep</td><td>15 Sep</td>
+              <td><div class="progress-cell"><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div><span>0%</span></div></td>
+            </tr>
+            <tr>
+              <td class="mono">ELEC-1052</td><td>L6</td><td>Install cable tray supports in Unit 3</td><td>Electrical</td><td>Unit 3</td><td>11 Sep</td><td>17 Sep</td>
+              <td><div class="progress-cell"><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div><span>0%</span></div></td>
+            </tr>
+            <tr>
+              <td class="mono">ELEC-1030</td><td>L6</td><td>Install cable tray in Unit 4</td><td>Electrical</td><td>Unit 4</td><td>12 Sep</td><td>18 Sep</td>
+              <td><div class="progress-cell"><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div><span>0%</span></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

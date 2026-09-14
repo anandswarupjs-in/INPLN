@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntelliPlan - Authentication</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{min-height:100vh;background:#f4f7fb;display:flex;align-items:center;justify-content:center;color:#172033}
+.container{width:1100px;min-height:650px;background:#fff;border-radius:18px;overflow:hidden;display:flex;box-shadow:0 15px 45px rgba(0,0,0,.10)}
+.left-panel{width:45%;background:linear-gradient(145deg,#173b67,#0d2747);color:#fff;padding:55px 45px;position:relative;overflow:hidden}
+.logo{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:bold;margin-bottom:70px}
+.logo-icon{width:42px;height:42px;background:#fff;color:#173b67;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px}
+.left-panel h1{font-size:38px;line-height:1.15;margin-bottom:20px}
+.left-panel>p{color:#cbd8e8;line-height:1.7;font-size:15px;margin-bottom:45px}
+.workflow{display:flex;flex-direction:column;gap:18px}
+.workflow-item{display:flex;align-items:center;gap:14px}
+.workflow-number{width:34px;height:34px;border:1px solid rgba(255,255,255,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px}
+.workflow-text{font-size:14px;color:#dce6f2}
+.workflow-line{height:20px;width:1px;background:rgba(255,255,255,.25);margin-left:16px}
+.security{position:absolute;bottom:35px;left:45px;font-size:12px;color:#aebfd4}
+.right-panel{width:55%;padding:45px 60px}
+.top-tabs{display:flex;gap:35px;border-bottom:1px solid #e5e9ef;margin-bottom:35px}
+.tab{padding-bottom:15px;font-size:15px;color:#8792a5;cursor:pointer}
+.tab.active{color:#173b67;font-weight:bold;border-bottom:2px solid #173b67}
+.form-section h2{font-size:28px;margin-bottom:8px}
+.subtitle{color:#7c8799;font-size:14px;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
+.field input,.field select,.field textarea{width:100%;border:1px solid #d9dee7;border-radius:8px;padding:12px 14px;font-size:14px;outline:none;background:#fff}
+.field input,.field select{height:46px}
+.field textarea{height:75px;resize:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#173b67}
+.password-wrapper{position:relative}
+.password-wrapper input{padding-right:50px}
+.eye{position:absolute;right:14px;top:14px;cursor:pointer;color:#7d8796}
+.options{display:flex;justify-content:space-between;align-items:center;margin:5px 0 25px;font-size:12px}
+.remember{display:flex;gap:7px;align-items:center;color:#6e7888}
+.forgot,.link{color:#173b67;cursor:pointer;font-weight:600}
+.primary-btn{width:100%;height:48px;border:none;border-radius:8px;background:#173b67;color:#fff;font-size:14px;font-weight:bold;cursor:pointer}
+.primary-btn:hover{background:#102e51}
+.divider{display:flex;align-items:center;gap:12px;color:#a0a8b5;font-size:12px;margin:25px 0}
+.divider:before,.divider:after{content:"";height:1px;background:#e5e8ed;flex:1}
+.demo-btn{width:100%;height:45px;background:#fff;border:1px solid #d8dee8;border-radius:8px;cursor:pointer;font-size:13px;color:#364256}
+.bottom-text{text-align:center;margin-top:22px;font-size:13px;color:#7c8797}
+.bottom-text span{color:#173b67;font-weight:bold;cursor:pointer}
+#requestForm,#pmForm{display:none}
+.role-info{background:#f3f6fa;border-left:3px solid #173b67;padding:12px 14px;border-radius:6px;margin-bottom:18px;font-size:12px;color:#657084;line-height:1.5}
+.role-info strong{color:#173b67}
+.terms{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:#737d8c;margin:12px 0 18px}
+.status-box{background:#f8fafc;border:1px solid #e1e6ee;border-radius:8px;padding:12px;margin:15px 0;font-size:12px;line-height:1.5;color:#697487}
+@media(max-width:850px){.container{width:95%}.left-panel{display:none}.right-panel{width:100%;padding:40px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="left-panel">
+<div class="logo"><div class="logo-icon">IP</div>IntelliPlan</div>
+<h1>Connect field execution with your project schedule.</h1>
+<p>Intelligent data capture and schedule-linking for infrastructure projects.</p>
+
+<div class="workflow">
+<div class="workflow-item"><div class="workflow-number">01</div><div class="workflow-text">Project Creation</div></div>
+<div class="workflow-line"></div>
+<div class="workflow-item"><div class="workflow-number">02</div><div class="workflow-text">Admin Approval</div></div>
+<div class="workflow-line"></div>
+<div class="workflow-item"><div class="workflow-number">03</div><div class="workflow-text">Project User Access</div></div>
+<div class="workflow-line"></div>
+<div class="workflow-item"><div class="workflow-number">04</div><div class="workflow-text">Field Reports & Matching</div></div>
+</div>
+<div class="security">🔒 Secure role-based project access</div>
+</div>
+
+<div class="right-panel">
+
+<div class="top-tabs">
+<div class="tab active" id="loginTab" onclick="showLogin()">Login</div>
+<div class="tab" id="requestTab" onclick="showRequest()">Request Access</div>
+<div class="tab" id="pmTab" onclick="showPM()">Project Manager</div>
+</div>
+
+<!-- LOGIN -->
+<div class="form-section" id="loginForm">
+<h2>Welcome back</h2>
+<p class="subtitle">Sign in to access your project workspace.</p>
+
+<div class="field">
+<label>Work Email</label>
+<input type="email" placeholder="name@company.com">
+</div>
+
+<div class="field">
+<label>Password</label>
+<div class="password-wrapper">
+<input id="loginPassword" type="password" placeholder="Enter your password">
+<span class="eye" onclick="togglePassword('loginPassword')">👁</span>
+</div>
+</div>
+
+<div class="options">
+<label class="remember"><input type="checkbox"> Remember me</label>
+<span class="forgot">Forgot password?</span>
+</div>
+
+<button class="primary-btn" onclick="alert('Mock login — backend authentication not connected.')">LOGIN</button>
+
+<div class="divider">OR</div>
+<button class="demo-btn" onclick="alert('Mock demo account selected.')">Continue with Demo Account</button>
+
+<div class="bottom-text">
+Need project access? <span onclick="showRequest()">Request Access</span>
+</div>
+</div>
+
+<!-- SITE ENGINEER / SUPERVISOR REQUEST -->
+<div class="form-section" id="requestForm">
+<h2>Request Project Access</h2>
+<p class="subtitle">Ask the Project Manager to add you to an existing project.</p>
+
+<div class="role-info">
+<strong>Who uses this?</strong><br>
+Site Engineers and Supervisors can request access to an existing project.
+The Project Manager reviews and approves the request.
+</div>
+
+<div class="field">
+<label>Full Name</label>
+<input type="text" placeholder="Enter your full name">
+</div>
+
+<div class="field">
+<label>Work Email</label>
+<input type="email" placeholder="name@company.com">
+</div>
+
+<div class="field">
+<label>Project Code / Project ID</label>
+<input type="text" placeholder="e.g. GIE-2026">
+</div>
+
+<div class="field">
+<label>Requested Role</label>
+<select>
+<option value="">Select role</option>
+<option>Site Engineer</option>
+<option>Supervisor</option>
+</select>
+</div>
+
+<div class="field">
+<label>Message to Project Manager</label>
+<textarea placeholder="Briefly explain why you need access..."></textarea>
+</div>
+
+<button class="primary-btn" onclick="alert('Mock request submitted to Project Manager.')">SEND ACCESS REQUEST</button>
+
+<div class="bottom-text">Already have an account? <span onclick="showLogin()">Login</span></div>
+</div>
+
+<!-- PROJECT MANAGER -->
+<div class="form-section" id="pmForm">
+<h2>Project Manager Account</h2>
+<p class="subtitle">Create your Project Manager account and start a project.</p>
+
+<div class="role-info">
+<strong>Project Manager flow:</strong><br>
+Create account → Create Project → Admin Approval → Project becomes active.
+After approval, you can add Site Engineers and Supervisors to your project.
+</div>
+
+<div class="field">
+<label>Full Name</label>
+<input type="text" placeholder="Enter your full name">
+</div>
+
+<div class="field">
+<label>Work Email</label>
+<input type="email" placeholder="name@company.com">
+</div>
+
+<div class="field">
+<label>Organization</label>
+<input type="text" placeholder="Company / Organization">
+</div>
+
+<div class="field">
+<label>Department</label>
+<input type="text" placeholder="Planning / Civil / Electrical...">
+</div>
+
+<div class="field">
+<label>Password</label>
+<div class="password-wrapper">
+<input id="pmPassword" type="password" placeholder="Create password">
+<span class="eye" onclick="togglePassword('pmPassword')">👁</span>
+</div>
+</div>
+
+<div class="terms">
+<input type="checkbox">
+<span>I agree to the organization's terms and data access policy.</span>
+</div>
+
+<button class="primary-btn" onclick="alert('Mock Project Manager account created. Next step: Create Project and submit it for Admin approval.')">CREATE PM ACCOUNT</button>
+
+<div class="status-box">
+<strong>Next step after registration:</strong><br>
+Create your infrastructure project. The project will remain pending until an Admin approves it.
+</div>
+
+<div class="bottom-text">Already have an account? <span onclick="showLogin()">Login</span></div>
+</div>
+
+</div>
+</div>
+
+<script>
+function setTabs(active){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+active.classList.add('active');
+}
+function hideAll(){
+document.getElementById('loginForm').style.display='none';
+document.getElementById('requestForm').style.display='none';
+document.getElementById('pmForm').style.display='none';
+}
+function showLogin(){
+hideAll();
+document.getElementById('loginForm').style.display='block';
+setTabs(document.getElementById('loginTab'));
+}
+function showRequest(){
+hideAll();
+document.getElementById('requestForm').style.display='block';
+setTabs(document.getElementById('requestTab'));
+}
+function showPM(){
+hideAll();
+document.getElementById('pmForm').style.display='block';
+setTabs(document.getElementById('pmTab'));
+}
+function togglePassword(id){
+const input=document.getElementById(id);
+input.type=input.type==='password'?'text':'password';
+}
+</script>
+</body>
+</html>

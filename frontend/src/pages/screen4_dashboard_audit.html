@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IntelliPlan â€” Actual Progress & Project Dashboard</title>
+<style>
+  :root{
+    --navy:#111111; --navy-dark:#111111; --navy-light:#222222;
+    --bg:#f5f5f5; --card:#FFFFFF; --border:#e5e5e5;
+    --text:#111111; --muted:#888888; --muted-2:#bbbbbb;
+    --orange:#10b981; --orange-bg:#d1fae5;
+    --success:#065f46; --success-bg:#d1fae5;
+    --blue:#1e40af; --blue-bg:#e8f4fd;
+    --warn:#333333; --warn-bg:#f5f5f5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:236px;background:var(--navy-dark);color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 20px 22px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px;}
+  .brand-mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--orange),#F0A24A);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#1c1c1c;}
+  .brand-name{font-size:15px;font-weight:700;letter-spacing:.2px;}
+  .brand-sub{font-size:10.5px;color:#9FB2C8;margin-top:1px;}
+  .nav{display:flex;flex-direction:column;gap:2px;padding:0 10px;}
+  .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;color:#C4D2E2;text-decoration:none;font-size:13.5px;font-weight:500;}
+  .nav a.active{background:#d1fae5;color:#065f46;}
+  .nav a .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.55;}
+  .nav a.active .dot{background:#10b981;opacity:1;}
+  .sidebar-foot{margin-top:auto;padding:14px 20px 4px;font-size:11px;color:#7C93AC;border-top:1px solid rgba(255,255,255,.08);}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .proj-name{font-size:15px;font-weight:700;}
+  .status-badge{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--success-bg);color:var(--success);}
+  .topbar-right{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+  .content{padding:22px 32px 60px;max-width:1360px;}
+  h1.page-title{font-size:21px;font-weight:700;margin:0 0 4px;}
+  .page-sub{font-size:13px;color:var(--muted);margin:0 0 16px;}
+
+  .notice{display:flex;align-items:center;gap:10px;background:var(--success-bg);border:1px solid #BFE6CC;color:var(--success);border-radius:9px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:20px;}
+
+  .summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
+  .sum-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .sum-card .num{font-size:24px;font-weight:800;}
+  .sum-card .lbl{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .sum-card.n1 .num{color:var(--navy);}
+  .sum-card.n2 .num{color:var(--blue);}
+  .sum-card.n3 .num{color:var(--success);}
+  .sum-card.n4 .num{color:var(--warn);}
+  .sum-card.n5 .num{color:var(--success);}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:18px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .card-title{font-size:14.5px;font-weight:700;}
+  .card-tag{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--muted-2);}
+
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .cols3{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+
+  /* planned vs actual */
+  .pva-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+  .pva-act{font-size:14px;font-weight:700;}
+  .pva-id{font-size:12px;color:var(--muted);font-family:ui-monospace,monospace;}
+  .pva-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:12px;}
+  .pva-item .label{font-size:11px;color:var(--muted);}
+  .pva-item .value{font-size:13.5px;font-weight:700;}
+  .variance{color:var(--warn);}
+  .progress-track{width:100%;height:9px;background:#EDEFF2;border-radius:5px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--blue);border-radius:5px;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--border);background:#FAFBFC;}
+  tbody td{padding:10px 10px;border-bottom:1px solid #F0F2F4;}
+  tbody tr:last-child td{border-bottom:none;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--navy);font-weight:600;}
+  .status-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--blue-bg);color:var(--blue);}
+
+  /* chart */
+  .chart-box{display:flex;align-items:flex-end;gap:22px;height:150px;padding:6px 10px 0;}
+  .chart-bar-group{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bars{display:flex;gap:6px;align-items:flex-end;height:120px;}
+  .bar{width:20px;border-radius:4px 4px 0 0;}
+  .bar.planned{background:var(--muted-2);}
+  .bar.actual{background:var(--blue);}
+  .chart-x{font-size:10.5px;color:var(--muted);margin-top:6px;}
+  .legend{display:flex;gap:16px;font-size:11.5px;color:var(--muted);margin-top:8px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend .sw{width:10px;height:10px;border-radius:2px;}
+
+  /* audit trail */
+  .audit-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #F0F2F4;}
+  .audit-item:last-child{border-bottom:none;}
+  .audit-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:5px;flex-shrink:0;}
+  .audit-time{font-size:11px;color:var(--muted-2);white-space:nowrap;width:150px;flex-shrink:0;}
+  .audit-body .title{font-size:13px;font-weight:700;}
+  .audit-body .sub{font-size:12px;color:var(--muted);margin-top:1px;}
+
+  .flow-strip{display:flex;align-items:center;gap:0;margin-top:6px;}
+  .flow-step{flex:1;background:#fff;border:1px solid var(--border);border-radius:8px;padding:11px 12px;text-align:center;font-size:11.5px;font-weight:700;}
+  .flow-arrow{width:22px;text-align:center;color:var(--muted-2);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">IP</div>
+      <div>
+        <div class="brand-name">IntelliPlan</div>
+        <div class="brand-sub">Project Scheduling App</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="active" href="#"><span class="dot"></span> Dashboard</a>
+      <a href="#"><span class="dot"></span> Projects</a>
+      <a href="#"><span class="dot"></span> Schedule</a>
+      <a href="#"><span class="dot"></span> Field Reports</a>
+      <a href="#"><span class="dot"></span> Matching & Verification</a>
+      <a href="#"><span class="dot"></span> Progress</a>
+      <a href="#"><span class="dot"></span> Audit Trail</a>
+    </div>
+    <div class="sidebar-foot">Organization: ABC Infrastructure Group</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="proj-name">Greenfield Industrial Expansion</div>
+        <div class="status-badge">â— Active</div>
+      </div>
+      <div class="topbar-right">
+        <span>Project Manager</span>
+        <div class="avatar">PM</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <h1 class="page-title">Actual Progress & Project Dashboard</h1>
+      <p class="page-sub">Everything below is a result of the verified pipeline â€” the dashboard reflects confirmed matches, not raw AI output.</p>
+
+      <div class="notice">âœ“ Match verified successfully. ELEC-1024 actual start updated to 12 Sep 2026.</div>
+
+      <div class="summary-grid">
+        <div class="sum-card n1"><div class="num">35%</div><div class="lbl">Overall Progress</div></div>
+        <div class="sum-card n2"><div class="num">128</div><div class="lbl">Reports Processed</div></div>
+        <div class="sum-card n3"><div class="num">104</div><div class="lbl">Matched Events</div></div>
+        <div class="sum-card n4"><div class="num">12</div><div class="lbl">Unmatched Events</div></div>
+        <div class="sum-card n5"><div class="num">92</div><div class="lbl">Verified Events</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Planned vs Actual</div>
+          <div class="card-tag">DATABASE UPDATE</div>
+        </div>
+        <div class="pva-head">
+          <div class="pva-act">ELEC-1024 â€” Install cable tray in Unit 3</div>
+          <div class="pva-id">L6 Â· Electrical Â· Unit 3</div>
+        </div>
+        <div class="pva-grid">
+          <div class="pva-item"><div class="label">Planned Start</div><div class="value">10 Sep 2026</div></div>
+          <div class="pva-item"><div class="label">Actual Start</div><div class="value">12 Sep 2026</div></div>
+          <div class="pva-item"><div class="label">Start Variance</div><div class="value variance">+2 days</div></div>
+          <div class="pva-item"><div class="label">Progress</div><div class="value">35%</div></div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:35%"></div></div>
+      </div>
+
+      <div class="cols3">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Activity Status</div>
+          </div>
+          <table>
+            <thead><tr><th>Activity ID</th><th>Activity</th><th>Planned</th><th>Actual</th><th>Progress</th><th>Variance</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="mono">ELEC-1024</td><td>Install cable tray in Unit 3</td><td>10 Sep</td><td>12 Sep</td><td>35%</td><td class="variance">+2 days</td>
+                <td><span class="status-chip">In Progress</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:20px;">
+            <div class="card-head"><div class="card-title" style="font-size:13.5px;">Planned Progress vs Actual Progress</div></div>
+            <div class="chart-box">
+              <div class="chart-bar-group"><div class="bars"><div class="bar planned" style="height:30%"></div><div class="bar actual" style="height:22%"></div></div><div class="chart-x">Wk 1</div></div>
+              <div class="chart-bar-group"><div class="bars"><div class="bar planned" style="height:55%"></div><div class="bar actual" style="height:45%"></div></div><div class="chart-x">Wk 2</div></div>
+              <div class="chart-bar-group"><div class="bars"><div class="bar planned" style="height:78%"></div><div class="bar actual" style="height:68%"></div></div><div class="chart-x">Wk 3</div></div>
+              <div class="chart-bar-group"><div class="bars"><div class="bar planned" style="height:100%"></div><div class="bar actual" style="height:84%"></div></div><div class="chart-x">Wk 4</div></div>
+            </div>
+            <div class="legend">
+              <span><span class="sw" style="background:var(--muted-2)"></span>Planned</span>
+              <span><span class="sw" style="background:var(--blue)"></span>Actual</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Audit Trail</div>
+            <div class="card-tag">FULL TRACEABILITY</div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-dot"></div>
+            <div class="audit-time">12 Sep Â· 10:42 AM</div>
+            <div class="audit-body"><div class="title">Field report uploaded</div><div class="sub">Source: Daily_Report_12Sep.txt</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-dot"></div>
+            <div class="audit-time">12 Sep Â· 10:43 AM</div>
+            <div class="audit-body"><div class="title">Event extracted</div><div class="sub">Electrical / Unit 3 / Cable tray / 35%</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-dot" style="background:var(--orange);"></div>
+            <div class="audit-time">12 Sep Â· 10:43 AM</div>
+            <div class="audit-body"><div class="title">Match proposed</div><div class="sub">ELEC-1024 Â· Confidence: 94%</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-dot" style="background:var(--success);"></div>
+            <div class="audit-time">12 Sep Â· 10:45 AM</div>
+            <div class="audit-body"><div class="title">Match verified</div><div class="sub">Verified by: Project Manager</div></div>
+          </div>
+          <div class="audit-item">
+            <div class="audit-dot" style="background:var(--success);"></div>
+            <div class="audit-time">12 Sep Â· 10:45 AM</div>
+            <div class="audit-body"><div class="title">Actual start updated</div><div class="sub">ELEC-1024 â†’ 12 Sep 2026</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Complete Data Flow</div></div>
+        <div class="flow-strip">
+          <div class="flow-step">Field Report</div><div class="flow-arrow">â†’</div>
+          <div class="flow-step">Extracted Event</div><div class="flow-arrow">â†’</div>
+          <div class="flow-step">Match</div><div class="flow-arrow">â†’</div>
+          <div class="flow-step" style="border-color:var(--orange);background:var(--orange-bg);">Human Verification</div><div class="flow-arrow">â†’</div>
+          <div class="flow-step" style="border-color:var(--blue);background:var(--blue-bg);">Actual Schedule Update</div><div class="flow-arrow">â†’</div>
+          <div class="flow-step" style="border-color:var(--success);background:var(--success-bg);">Dashboard + Audit Trail</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
