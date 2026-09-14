@@ -25,10 +25,10 @@ Update the IntelliPlan authentication and project-management flow with strict hi
 - Human verification queue (accept / reject / choose another) updates activity actuals + writes audit trail.
 
 ## What's implemented (2026-02)
-- Backend (FastAPI + Motor + Mongo): auth, admin approvals, PM dashboard, access requests, workspace, CSV baseline upload with **non-destructive upsert** (preserves actual progress), field report extraction + matching, verification, audit trail, and `GET /api/download/deployment-zip` for the source ZIP.
+- Backend (FastAPI + SQLAlchemy + MySQL): auth, admin approvals, PM dashboard, access requests, workspace, CSV baseline upload with **non-destructive upsert** (preserves actual progress), field report extraction + matching, verification, audit trail, and `GET /api/download/deployment-zip` for the source ZIP.
 - Frontend (React 19 + Tailwind + shadcn): Home, Login (with quick-login demo banner), Register Project (PM), Request Access (SE / Supervisor), Admin Dashboard (Pending / Approved / Rejected sections), PM Dashboard + access approvals, Project Workspace with tabs (Schedule / Reports / Verification / Audit), Download ZIP button on the Home hero.
 - Seeded demo project `ELEC-1024-U3` (approved) with sample L1–L6 activities and role-scoped users.
-- Deployment: `deployment_agent` returns PASS; supervisor-managed; MongoDB from `MONGO_URL`; frontend from `REACT_APP_BACKEND_URL`.
+- Deployment: hosted on Render (backend) + Vercel (frontend) + Railway (MySQL); MySQL from `DATABASE_URL`; frontend from `REACT_APP_BACKEND_URL`.
 - Testing agent: 22/22 backend + 100% frontend on iteration 3.
 - Deployable ZIP at `/app/dist/intelliplan_deployment.zip` and served at `/api/download/deployment-zip`.
 

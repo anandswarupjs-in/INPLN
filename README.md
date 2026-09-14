@@ -1,6 +1,6 @@
 # IntelliPlan — Construction Schedule Intelligence Platform
 
-**Full-stack (React + FastAPI + MongoDB) role-based project management with L1–L6 baseline scheduling, field report ingestion, layered AI matching, and human verification.**
+**Full-stack (React + FastAPI + MySQL) role-based project management with L1–L6 baseline scheduling, field report ingestion, layered AI matching, and human verification.**
 
 ---
 
@@ -41,14 +41,14 @@ The Login page carries a top **Demo Seed Accounts** banner — click any button 
 ### Prerequisites
 - Python 3.11+
 - Node 20 + Yarn
-- MongoDB 6+ (running locally on `mongodb://localhost:27017` or set `MONGO_URL`)
+- MySQL 8+ (running locally — set `DATABASE_URL` in `backend/.env`)
 
 ### Backend
 ```bash
 cd backend
 pip install -r requirements.txt
-# .env must contain MONGO_URL, DB_NAME, CORS_ORIGINS
-uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+# .env must contain DATABASE_URL and CORS_ORIGINS
+uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Frontend
@@ -94,9 +94,9 @@ The React implementation in `frontend/src/App.js` mirrors these flows using the 
 ---
 
 ## Tech Stack
-- **Backend** — FastAPI, Motor (async MongoDB), Pydantic
+- **Backend** — FastAPI, SQLAlchemy (async, aiomysql), Pydantic
 - **Frontend** — React 19, React Router, Tailwind, shadcn/ui components, Lucide icons, Sonner toasts
-- **Database** — MongoDB (`users`, `projects`, `activities`, `access_requests`, `reports`, `matches`, `audit`, `schedule_files`)
+- **Database** — MySQL (`users`, `projects`, `activities`, `access_requests`, `reports`, `matches`, `audit`, `schedule_files`)
 
 ---
 
