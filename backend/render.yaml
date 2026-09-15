@@ -5,13 +5,10 @@ services:
     region: singapore
     plan: free
     buildCommand: pip install -r requirements.txt
-    # --http httptools: switches from h11 (strict, crashes on proxy headers Render adds)
-    #   to httptools (lenient, faster, handles Render's nginx forwarded requests correctly).
-    # --proxy-headers: tells uvicorn to trust X-Forwarded-Proto / X-Forwarded-For.
-    # --forwarded-allow-ips='*': trust proxy headers from Render's internal load balancer
-    #   (Render's proxy IP is not 127.0.0.1, so the default blocks it).
-    # These three flags together prevent uvicorn from returning HTTP 400 for OPTIONS
-    # preflights that Render's proxy forwards with non-standard headers.
+    # NOTE: Render does NOT re-read startCommand from render.yaml for existing services.
+    # The dashboard start command is frozen at creation time and ignores render.yaml updates.
+    # The uvicorn flags are therefore applied via UVICORN_* environment variables below,
+    # which Render DOES sync from render.yaml on every deploy.
     startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT --http httptools --proxy-headers --forwarded-allow-ips='*'
     healthCheckPath: /api/
     envVars:
@@ -21,3 +18,18 @@ services:
         value: "https://intelliplanwithdurai.online,https://www.intelliplanwithdurai.online"
       - key: PYTHON_VERSION
         value: "3.11.0"
+      # -----------------------------------------------------------------------
+      # Uvicorn runtime flags via env vars (click auto_envvar_prefix="UVICORN").
+      # These are synced by Render on every deploy, unlike startCommand which is
+      # frozen for existing services. They override uvicorn CLI defaults.
+      # -----------------------------------------------------------------------
+      # Switch from h11 (strict RFC parser, rejects Render proxy headers → HTTP 400)
+      # to httptools (lenient C parser, handles proxy-forwarded requests correctly).
+      - key: UVICORN_HTTP
+        value: "httptools"
+      # Trust X-Forwarded-Proto / X-Forwarded-For headers from upstream proxy.
+      - key: UVICORN_PROXY_HEADERS
+        value: "true"
+      # Trust proxy headers from any IP — Render's LB is NOT 127.0.0.1 (the default).
+      - key: UVICORN_FORWARDED_ALLOW_IPS
+        value: "*"
