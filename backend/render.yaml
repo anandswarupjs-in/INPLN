@@ -5,7 +5,14 @@ services:
     region: singapore
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    # --http httptools: switches from h11 (strict, crashes on proxy headers Render adds)
+    #   to httptools (lenient, faster, handles Render's nginx forwarded requests correctly).
+    # --proxy-headers: tells uvicorn to trust X-Forwarded-Proto / X-Forwarded-For.
+    # --forwarded-allow-ips='*': trust proxy headers from Render's internal load balancer
+    #   (Render's proxy IP is not 127.0.0.1, so the default blocks it).
+    # These three flags together prevent uvicorn from returning HTTP 400 for OPTIONS
+    # preflights that Render's proxy forwards with non-standard headers.
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT --http httptools --proxy-headers --forwarded-allow-ips='*'
     healthCheckPath: /api/
     envVars:
       - key: DATABASE_URL

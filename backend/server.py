@@ -555,20 +555,16 @@ async def verify_match(project_id: str, req: VerifyReq):
 # ============================================================
 # CORS + mount router
 # ============================================================
-# IMPORTANT: add_middleware MUST be called before include_router.
-# FastAPI/Starlette builds the middleware stack at startup; if routes
-# are mounted first, OPTIONS preflight requests reach the router before
-# the CORS middleware can handle them, causing HTTP 400 responses.
+# Parse CORS_ORIGINS env var. In production (Render), this is set to:
+# https://intelliplanwithdurai.online,https://www.intelliplanwithdurai.online
+# When allow_credentials=True, allow_origins must be an explicit list (not "*").
 _raw_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 _wildcard = not _raw_origins or _raw_origins == ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    # When origins are specific (production), enable credentials.
-    # When wildcard, disable credentials — browsers reject
-    # Access-Control-Allow-Credentials: true with a wildcard origin.
     allow_origins=["*"] if _wildcard else _raw_origins,
-    allow_credentials=not _wildcard,
+    allow_credentials=not _wildcard,   # True only with specific origins (never with "*")
     allow_methods=["*"],
     allow_headers=["*"],
 )
